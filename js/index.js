@@ -144,6 +144,7 @@ var host = "";
 var url = "/sdapi/v1/";
 const basePixelCount = 64; //64 px - ALWAYS 64 PX
 var focused = true;
+let defaultScripts = {};
 
 function startup() {
 	testHostConfiguration();
@@ -170,6 +171,7 @@ function startup() {
 	changeRestoreFaces();
 	changeSyncCursorSize();
 	checkFocus();
+	loadDefaultScripts();
 }
 
 function setFixedHost(h, changePromptMessage) {
@@ -1355,5 +1357,56 @@ function checkFocus() {
 		focused = false;
 	} else {
 		focused = true;
+	}
+}
+
+async function loadDefaultScripts() {
+	selector = document.getElementById("script-selector");
+	const response = await fetch("./defaultscripts.json");
+	const json = await response.json();
+	for (const key in json.defaultScripts) {
+		var opt = document.createElement("option");
+		opt.value = opt.innerHTML = key;
+		selector.appendChild(opt);
+	}
+	defaultScripts = json;
+	//return json;
+}
+
+function changeScript(evt) {
+	let enable = () => {
+		scriptName.disabled = false;
+	};
+	let disable = () => {
+		scriptName.disabled = true;
+	};
+	let selected = evt.target.value;
+	let scriptName = document.getElementById("script-name-input");
+	let scriptArgs = document.getElementById("script-args-input");
+	scriptName.value = selected;
+	disable();
+	switch (selected) {
+		case "custom": {
+			scriptName.value = "";
+			scriptArgs.value = "";
+			scriptArgs.title = "";
+			enable();
+			break;
+		}
+		case "": {
+			// specifically no selected script
+			scriptArgs.value = "";
+			scriptArgs.title = "";
+			break;
+		}
+		default: {
+			// check defaultScripts objects for selected script
+			scriptName.value = selected;
+			scriptArgs.value = defaultScripts.defaultScripts[selected].scriptValues;
+			scriptArgs.title = defaultScripts.defaultScripts[selected].titleText;
+			// if not found, check user scripts
+
+			// if not found, wtf
+		}
 	}
 }

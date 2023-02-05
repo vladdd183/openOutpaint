@@ -415,6 +415,11 @@ const stampTool = () =>
 					const resource = state.selected;
 
 					if (resource) {
+						if (
+							localStorage.getItem("openoutpaint/settings.autolayer") == "true"
+						) {
+							commands.runCommand("addLayer", "Added Layer", {});
+						}
 						const {canvas, bb} = cropCanvas(ovCanvas, {border: 10});
 
 						let commandLog = "";

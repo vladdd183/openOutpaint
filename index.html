@@ -5,7 +5,7 @@
 		<title>openOutpaint 🐠</title>
 		<!-- CSS Variables -->
 		<link href="css/colors.css?v=f732f19" rel="stylesheet" />
-		<link href="css/icons.css?v=466e14e" rel="stylesheet" />
+		<link href="css/icons.css?v=599e732" rel="stylesheet" />
 
 		<link href="css/index.css?v=61e08f5" rel="stylesheet" />
 		<link href="css/layers.css?v=92c0352" rel="stylesheet" />
@@ -361,6 +361,34 @@
 			</div>
 		</div>
 
+		<!-- Scripts-->
+		<div
+			id="ui-script"
+			class="floating-window"
+			style="right: 10px; top: 400px; display: none">
+			<div class="draggable floating-window-title">Script</div>
+			<div class="menu-container" style="min-width: 200px">
+				<div id="script-select" class="script-select">
+					<select id="script-selector" onchange="changeScript(event)">
+						<option id="no_selected_script" value="">Select a script...</option>
+						<option id="custom" value="custom">Other</option>
+					</select>
+				</div>
+				<div id="script-name" class="script-name">
+					<label for="script-name-input">Script Name:</label>
+					<br />
+					<input id="script-name-input" disabled="disabled" />
+					<br />
+				</div>
+				<div id="script-args" class="script-args">
+					<label for="script-args-input">Script Args List:</label>
+					<br />
+					<textarea id="script-args-input"></textarea>
+					<br />
+				</div>
+			</div>
+		</div>
+
 		<!-- Toolbar -->
 		<div
 			id="ui-toolbar"
@@ -399,10 +427,10 @@
 		<script src="js/defaults.js?v=5b06818" type="text/javascript"></script>
 
 		<!-- Base Libs -->
-		<script src="js/lib/util.js?v=e82dd04" type="text/javascript"></script>
+		<script src="js/lib/util.js?v=24130a5" type="text/javascript"></script>
 		<script src="js/lib/events.js?v=2ab7933" type="text/javascript"></script>
 		<script src="js/lib/db.js?v=434363b" type="text/javascript"></script>
-		<script src="js/lib/input.js?v=aa14afc" type="text/javascript"></script>
+		<script src="js/lib/input.js?v=769485c" type="text/javascript"></script>
 		<script src="js/lib/layers.js?v=1a452a1" type="text/javascript"></script>
 		<script src="js/lib/commands.js?v=ad60afc" type="text/javascript"></script>
 
@@ -419,13 +447,13 @@
 
 		<!-- Content -->
 		<script src="js/prompt.js?v=7a1c68c" type="text/javascript"></script>
-		<script src="js/index.js?v=e2f6c36" type="text/javascript"></script>
+		<script src="js/index.js?v=e87f7bf" type="text/javascript"></script>
 
 		<script
 			src="js/ui/floating/history.js?v=4f29db4"
 			type="text/javascript"></script>
 		<script
-			src="js/ui/floating/layers.js?v=aa78ec8"
+			src="js/ui/floating/layers.js?v=cf1089d"
 			type="text/javascript"></script>
 
 		<!-- Load Tools -->
@@ -433,7 +461,7 @@
 			src="js/ui/tool/generic.js?v=3e678e0"
 			type="text/javascript"></script>
 
-		<script src="js/ui/tool/dream.js?v=7bdcf21" type="text/javascript"></script>
+		<script src="js/ui/tool/dream.js?v=fc1c6f7" type="text/javascript"></script>
 		<script
 			src="js/ui/tool/maskbrush.js?v=d88810f"
 			type="text/javascript"></script>
@@ -443,7 +471,7 @@
 		<script
 			src="js/ui/tool/select.js?v=39911b2"
 			type="text/javascript"></script>
-		<script src="js/ui/tool/stamp.js?v=d89b15d" type="text/javascript"></script>
+		<script src="js/ui/tool/stamp.js?v=455f9fe" type="text/javascript"></script>
 		<script
 			src="js/ui/tool/interrogate.js?v=e579ff1"
 			type="text/javascript"></script>
@@ -453,7 +481,7 @@
 			src="js/initalize/workspace.populate.js?v=e5586da"
 			type="text/javascript"></script>
 		<script
-			src="js/initalize/shortcuts.populate.js?v=fd01c47"
+			src="js/initalize/shortcuts.populate.js?v=e68546f"
 			type="text/javascript"></script>
 		<script
 			src="js/initalize/toolbar.populate.js?v=c1ca438"

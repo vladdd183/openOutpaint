@@ -92,10 +92,29 @@ const generating = (val) => {
  *
  * @param {"txt2img" | "img2img"} endpoint Endpoint to send the request to
  * @param {StableDiffusionRequest} request Stable diffusion request
+ * @param {BoundingBox} bb Optional: Generated image placement location
  * @returns {Promise<string[]>}
  */
-const _dream = async (endpoint, request) => {
+const _dream = async (endpoint, request, bb = null) => {
+	var bgImg = null;
+	if (
+		endpoint == "img2img" &&
+		bb &&
+		toolbar._current_tool.state.removeBackground
+	) {
+		bgImg = uil.getVisible(bb, {includeBg: false});
+	}
+
 	const apiURL = `${host}${config.api.path}${endpoint}`;
+	// if script fields are populated add them to the request
+	var scriptName = document.getElementById("script-name-input").value;
+	var scriptArgs = document.getElementById("script-args-input").value;
+	if (scriptName.trim() != "" && scriptArgs.trim() != "") {
+		//TODO add some error handling and stuff?
+		request.script_name = scriptName.trim();
+		// This is necessary so types can be properly specified
+		request.script_args = JSON.parse(scriptArgs.trim() || "[]");
+	}
 
 	// Debugging is enabled
 	if (global.debug) {
@@ -160,6 +179,7 @@ const _dream = async (endpoint, request) => {
 	var returnData = {
 		images: data.images,
 		seeds: responseSubdata.all_seeds,
+		bgImg: bgImg,
 	};
 	return returnData;
 };
@@ -433,7 +453,7 @@ const _generate = async (endpoint, request, bb, options = {}) => {
 		});
 
 		imageCollection.inputElement.appendChild(interruptButton);
-		var dreamData = await _dream(endpoint, requestCopy);
+		var dreamData = await _dream(endpoint, requestCopy, bb);
 		images.push(...dreamData.images);
 		seeds.push(...dreamData.seeds);
 		stopDrawingStatus = true;
@@ -496,7 +516,7 @@ const _generate = async (endpoint, request, bb, options = {}) => {
 		// load the image data after defining the closure
 		img.src = "data:image/png;base64," + images[at];
 		img.addEventListener("load", () => {
-			const canvas = document.createElement("canvas");
+			let canvas = document.createElement("canvas");
 			canvas.width = bb.w;
 			canvas.height = bb.h;
 			const ctx = canvas.getContext("2d");
@@ -506,6 +526,24 @@ const _generate = async (endpoint, request, bb, options = {}) => {
 				ctx.drawImage(keepUnmaskCanvas, 0, 0);
 			}
 
+			if (localStorage.getItem("openoutpaint/settings.autolayer") == "true") {
+				commands.runCommand("addLayer", "Added Layer", {});
+			}
+
+			if (
+				endpoint == "img2img" &&
+				toolbar._current_tool.state.removeBackground
+			) {
+				canvas = subtractBackground(canvas, bb, dreamData.bgImg, 0);
+			}
+
+			commands.runCommand("drawImage", "Image Dream", {
+				x: bb.x,
+				y: bb.y,
+				w: bb.w,
+				h: bb.h,
+				image: canvas,
+			});
 			let commandLog = "";
 
 			const addline = (v, newline = true) => {
@@ -525,7 +563,7 @@ const _generate = async (endpoint, request, bb, options = {}) => {
 			addline(`        + Model   = ${modelAutoComplete.value}`);
 			addline(`        + +Prompt = ${request.prompt}`);
 			addline(`        + -Prompt = ${request.negative_prompt}`);
-			addline(`        + Styles = ${request.styles.join(", ")}`, false);
+			addline(`        + Styles  = ${request.styles.join(", ")}`, false);
 
 			commands.runCommand(
 				"drawImage",
@@ -1707,6 +1745,14 @@ const dreamTool = () =>
 						"icon-paintbrush"
 					).checkbox;
 
+					// Remove Identical/Background Pixels Checkbox
+					state.ctxmenu.removeBackgroundLabel = _toolbar_input.checkbox(
+						state,
+						"removeBackground",
+						"Remove Identical/BG Pixels",
+						"icon-slice"
+					).checkbox;
+
 					// Overmasking Slider
 					state.ctxmenu.overMaskPxLabel = _toolbar_input.slider(
 						state,
@@ -1742,6 +1788,7 @@ const dreamTool = () =>
 				array.appendChild(state.ctxmenu.invertMaskLabel);
 				array.appendChild(state.ctxmenu.preserveMasksLabel);
 				//menu.appendChild(document.createElement("br"));
+				array.appendChild(state.ctxmenu.removeBackgroundLabel);
 				array.appendChild(state.ctxmenu.keepUnmaskedLabel);
 				menu.appendChild(array);
 				menu.appendChild(state.ctxmenu.keepUnmaskedBlurSlider);
@@ -2264,6 +2311,14 @@ const img2imgTool = () =>
 						"icon-box-select"
 					).checkbox;
 
+					// Remove Identical/Background Pixels Checkbox
+					state.ctxmenu.removeBackgroundLabel = _toolbar_input.checkbox(
+						state,
+						"removeBackground",
+						"Remove Identical/BG Pixels",
+						"icon-slice"
+					).checkbox;
+
 					// Border Mask Size Slider
 					state.ctxmenu.borderMaskSlider = _toolbar_input.slider(
 						state,
@@ -2314,6 +2369,7 @@ const img2imgTool = () =>
 				array.appendChild(state.ctxmenu.snapToGridLabel);
 				array.appendChild(state.ctxmenu.invertMaskLabel);
 				array.appendChild(state.ctxmenu.preserveMasksLabel);
+				array.appendChild(state.ctxmenu.removeBackgroundLabel);
 				array.appendChild(state.ctxmenu.keepUnmaskedLabel);
 				menu.appendChild(array);
 				menu.appendChild(state.ctxmenu.keepUnmaskedBlurSlider);
